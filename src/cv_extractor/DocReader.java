@@ -48,15 +48,33 @@ public class DocReader
         data = new HashSet<String>();
     }
     
-    protected static void readDocFile() 
+    protected static void readFile()
     {
-        //Iterate for all files
+        //Iterate over all files
         for(int i=0;i<file.length;i++)
         {
-            try
+            //Send to appropriate method for reading
+            
+            if(file[i].getName().toLowerCase().endsWith(".doc"))
+            {
+                readDocFile(file[i]);
+            }
+            else if(file[i].getName().toLowerCase().endsWith(".docx"))
+            {
+                readDocxFile(file[i]);
+            }
+        }
+        
+        //Show all the email in the TextArea        
+        CV_Extractor.showInTetxArea(data);
+    }
+    
+    protected static void readDocFile(File localFile) 
+    {
+        try
             {
                 //Create a input stream to read file
-                FileInputStream fis = new FileInputStream(file[i].getAbsolutePath());
+                FileInputStream fis = new FileInputStream(localFile.getAbsolutePath());
 
                 //For reading docx files
                 HWPFDocument doc = new HWPFDocument(fis);
@@ -89,18 +107,14 @@ public class DocReader
             {
                 e.printStackTrace();
             }
-        }
     }
     
-    protected static void readDocxFile() 
+    protected static void readDocxFile(File localFile) 
     {
-        //Iterate for all files
-        for(int i=0;i<file.length;i++)
-        {
-            try 
+        try 
             {
                 //Create a input stream to read file
-		FileInputStream fis = new FileInputStream(file[i].getAbsolutePath());
+		FileInputStream fis = new FileInputStream(localFile.getAbsolutePath());
 
                 //For reading docx files
                 XWPFDocument document = new XWPFDocument(fis);
@@ -131,16 +145,9 @@ public class DocReader
             {
                 e.printStackTrace();
             }
-        }
-        
-        System.out.println(data);
-        
-        //Show all the email in the TextArea        
-        CV_Extractor.showInTetxArea(data);
-       
     }
     
-    protected static void generateExcel(String directory)
+    protected static void generateExcel(String directory, String fileName)
     {
         XSSFWorkbook workbook = new XSSFWorkbook();
          
@@ -183,7 +190,13 @@ public class DocReader
         try
         {  
             //Write the workbook in file system
-            FileOutputStream out = new FileOutputStream(new File(directory+"Email_List.xlsx"));
+            
+            if(fileName.equals(""))
+            {
+                fileName = "Email List";
+            }
+            
+            FileOutputStream out = new FileOutputStream(new File(directory+"/"+fileName+".xlsx"));
             workbook.write(out);
             out.close();
             
@@ -196,6 +209,3 @@ public class DocReader
         }
     }
 }
-
-
-

@@ -7,6 +7,7 @@ package cv_extractor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
@@ -21,11 +22,13 @@ import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -40,7 +43,7 @@ public class CV_Extractor extends JFrame implements ActionListener
 {
     static JButton select, generate, clear;
     
-    static JTextField cvFileName;
+    static JTextField jTextFieldFileName;
     
     static JTextArea cvList;
     
@@ -48,16 +51,43 @@ public class CV_Extractor extends JFrame implements ActionListener
     
     static JScrollPane cvListScrollPane;
     
+    static JLabel description, jLabelFileName;
+    
+    static String fileName;
+    
     private CV_Extractor() throws HeadlessException 
     {
-        setSize(500,500);
+        setSize(1000,1000);
         setBackground(Color.yellow);
+        setLayout(new BorderLayout());
         
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+                
+        pageStart = new JPanel(new BorderLayout());
         pageEnd = new JPanel();
-        pageStart = new JPanel();
         
+        //Elements of first Panel
+        description = new JLabel("Select doc/docx files and click Generate.",SwingConstants.CENTER);
+        
+        jLabelFileName = new JLabel("Excel file name:");
+        
+        cvList = new JTextArea("No E-mails right now");
+        cvList.setEditable(false);
+        
+        cvListScrollPane = new JScrollPane(cvList);
+        cvListScrollPane.setPreferredSize(new Dimension(100,500));
+        
+        jTextFieldFileName = new JTextField(100);
+        
+        pageStart.add(description,BorderLayout.PAGE_START);       
+        pageStart.add(jLabelFileName,BorderLayout.LINE_START);   
+        pageStart.add(jTextFieldFileName,BorderLayout.CENTER);
+        pageStart.add(cvListScrollPane,BorderLayout.PAGE_END);
+        
+        add(pageEnd,BorderLayout.PAGE_END);
+        
+        
+        //Elements of second Panel        
         select = new JButton("Select");
         select.addActionListener(this);
         select.setSize(100,100);
@@ -72,23 +102,10 @@ public class CV_Extractor extends JFrame implements ActionListener
         clear.setSize(100,100);
         clear.setForeground(Color.red);
         
-        cvList = new JTextArea("No E-mails right now",20,20);
-        cvList.setSize(300,300);
-        cvList.setMargin(new Insets(5,5,5,5));
-        cvList.setEditable(false);
-        
-        cvFileName = new JTextField();
-        cvFileName.setSize(300,300);
-        
-        cvListScrollPane = new JScrollPane(cvList);
-        
         pageEnd.add(select);
         pageEnd.add(generate);
         pageEnd.add(clear);
-        
-        pageStart.add(cvListScrollPane);
-        
-        add(pageEnd,BorderLayout.PAGE_END);
+                
         add(pageStart,BorderLayout.PAGE_START);
         
         setVisible(true);        
@@ -107,13 +124,14 @@ public class CV_Extractor extends JFrame implements ActionListener
                 JOptionPane.showMessageDialog(null,"No Emails !");
             }
             else
-            {                
+            {
                 openFileChooserToSelectDirectory();
             }
         }
          else if(ae.getActionCommand().equals("Clear"))
         {
             cvList.setText("No E-mails right now");
+            jTextFieldFileName.setText("");
         }
     }
         
@@ -179,7 +197,7 @@ public class CV_Extractor extends JFrame implements ActionListener
             }
         };
             
-        JFileChooser chooser = new JFileChooser("S://");
+        JFileChooser chooser = new JFileChooser("C://");
         
         chooser.setFileFilter(filter);
         
@@ -202,7 +220,7 @@ public class CV_Extractor extends JFrame implements ActionListener
             
             new DocReader(files);
             
-            DocReader.readDocxFile();
+            DocReader.readFile();
         }   
     }
     
@@ -222,9 +240,11 @@ public class CV_Extractor extends JFrame implements ActionListener
             {
                 File file = chooser.getSelectedFile();
                 
-                System.out.println(file.getCanonicalPath());                             
+                System.out.println(file.getCanonicalPath());   
+                
+                fileName = jTextFieldFileName.getText().toString();
                             
-                DocReader.generateExcel(file.getCanonicalPath());
+                DocReader.generateExcel(file.getCanonicalPath(),fileName);
             }
         }
         catch(Exception e)
